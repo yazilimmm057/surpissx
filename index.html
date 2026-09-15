@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kırmızı Çark VIP | Çarkı Çevir, En Karanlık Sırrını Açıkla!</title>
+  <meta name="description" content="220 cesaret ve itiraf sorusu, görüntülü/sesli sanal ceza sistemiyle arkadaşlarınla en karanlık sırları ortaya çıkaran VIP yetişkin oyunu.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Arka Plan Partikül ve Parıltı Canvas'ı -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Havai Fişek / Konfeti Canvas'ı -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- Üst Kontrol & Navigasyon Çubuğu -->
+    <header class="app-header">
+      <div class="top-nav-row">
+        <div class="tagline-badge">
+          <span class="live-dot"></span>
+          <span>🔥 ÇARKI ÇEVİR, EN KARANLIK SIRRINI AÇIKLA! 🎙️</span>
+        </div>
+        <div class="quick-tools">
+          <button id="fullscreen-btn" class="tool-btn" title="Tam Ekran Modu" aria-label="Tam Ekran">
+            <span id="fs-icon">⛶</span>
+          </button>
+          <button id="sound-toggle-btn" class="tool-btn" title="Sesi Aç/Kapat (Şu an Kapalı)" aria-label="Sesi Aç/Kapat">
+            <span id="sound-icon">🔇</span>
+          </button>
+          <button id="players-toggle-btn" class="tool-btn highlight" title="2 Oyuncu İsimleri" aria-label="Oyuncular">
+            <span>👥 2 Oyuncu</span>
+          </button>
+          <button id="history-btn" class="tool-btn" title="Geçmiş Sorular" aria-label="Geçmiş">
+            <span>📜</span>
+          </button>
+          <button id="reset-btn" class="tool-btn danger" title="Tüm Oyunu Sıfırla" aria-label="Sıfırla">
+            <span>🔄</span>
+          </button>
+        </div>
+      </div>
+
+      <h1 class="main-title">KIRMIZI ÇARK</h1>
+      
+      <!-- 2 Kişilik Baş Başa Oyun Arenası (Düello Kartları) -->
+      <div class="two-player-arena" id="two-player-arena">
+        <div class="player-card active-turn" id="p1-card" data-player="0" title="İsmi değiştirmek için tıkla">
+          <div class="player-card-avatar">🔥</div>
+          <div class="player-card-info">
+            <div class="player-card-name-row">
+              <span class="player-card-name" id="p1-name">1. Oyuncu</span>
+              <span class="player-turn-indicator" id="p1-indicator">⚡ SIRADA</span>
+            </div>
+            <div class="player-card-stats">
+              <span class="stat-badge score">🎯 <strong id="p1-score">0</strong> Puan</span>
+              <span class="stat-badge penalty">💀 <strong id="p1-drinks">0</strong> Ceza</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="versus-divider">
+          <span class="vs-badge">VS</span>
+          <button id="switch-turn-btn" class="switch-turn-btn" title="Sırayı Manuel Değiştir">⇄</button>
+        </div>
+
+        <div class="player-card" id="p2-card" data-player="1" title="İsmi değiştirmek için tıkla">
+          <div class="player-card-avatar">💋</div>
+          <div class="player-card-info">
+            <div class="player-card-name-row">
+              <span class="player-card-name" id="p2-name">2. Oyuncu</span>
+              <span class="player-turn-indicator hidden" id="p2-indicator">⚡ SIRADA</span>
+            </div>
+            <div class="player-card-stats">
+              <span class="stat-badge score">🎯 <strong id="p2-score">0</strong> Puan</span>
+              <span class="stat-badge penalty">💀 <strong id="p2-drinks">0</strong> Ceza</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- İlerleme ve İstatistik Çubuğu -->
+      <div class="game-progress-bar">
+        <div class="progress-info">
+          <span class="progress-title">🎲 OYUN İLERLEMESİ</span>
+          <span class="progress-numbers"><strong id="completed-count">0</strong> / <span id="total-count">220</span> Soru</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1. NORMAL ÇARK GÖRÜNÜMÜ -->
+    <div id="normal-wheel-view" class="wheel-view-container">
+      <!-- Kategori Filtreleme Barı -->
+      <section class="category-section">
+        <div class="category-legend" id="category-legend">
+          <button class="cat-pill cat-flirt active" data-cat="flirt">
+            <span class="cat-dot"></span> 💋 Aşk & Flört (<span class="cat-count" id="count-flirt">55</span>)
+          </button>
+          <button class="cat-pill cat-hot active" data-cat="hot">
+            <span class="cat-dot"></span> 🔥 Sıcak İtiraf (<span class="cat-count" id="count-hot">55</span>)
+          </button>
+          <button class="cat-pill cat-dare active" data-cat="dare">
+            <span class="cat-dot"></span> ⚡ Sanal Cesaret (<span class="cat-count" id="count-dare">55</span>)
+          </button>
+          <button class="cat-pill cat-taboo active" data-cat="taboo">
+            <span class="cat-dot"></span> 🎭 Gece & Tabu (<span class="cat-count" id="count-taboo">55</span>)
+          </button>
+        </div>
+      </section>
+
+      <!-- Çark Alanı -->
+      <main class="wheel-section">
+        <div class="wheel-outer-wrapper">
+          <div class="pointer-wrapper">
+            <div class="wheel-pointer" id="wheel-pointer">
+              <div class="pointer-gem"></div>
+            </div>
+          </div>
+
+          <div class="canvas-holder">
+            <canvas id="wheel-canvas" width="640" height="640"></canvas>
+            <div class="center-cap" id="center-spin-btn" title="Çevirmek için tıkla veya çarkı sürükle!">
+              <div class="inner-cap">
+                <span class="cap-vip">VIP</span>
+                <span class="spin-text">ÇEVİR</span>
+                <span class="spin-flame">🔥</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Çevir Butonu -->
+        <div class="action-panel">
+          <button id="main-spin-btn" class="glow-spin-button">
+            <span class="btn-shine"></span>
+            <span class="btn-icon">🎲</span>
+            <span class="btn-text">KADERİNİ ÇEVİR</span>
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <!-- 2. ALEVLİ ÇARK GÖRÜNÜMÜ (JS İLE AYNI SAYFADA AÇILAN KÜÇÜK ÇARK) -->
+    <div id="alevli-wheel-view" class="wheel-view-container alevli-view-wrap hidden">
+      <div class="alevli-header-bar">
+        <button id="back-to-normal-btn" class="back-home-btn" title="Normal Çarka Dön">
+          <span>← Normal Çarka Dön</span>
+        </button>
+        <div class="tagline-badge fiery">
+          <span class="live-dot flame"></span>
+          <span>🔥 FULL +18 ALEVLİ ÇARK 💋</span>
+        </div>
+      </div>
+
+      <main class="wheel-section compact-wheel">
+        <div class="wheel-outer-wrapper compact-wheel-wrap">
+          <div class="pointer-wrapper">
+            <div class="wheel-pointer fiery-pointer" id="alevli-pointer">
+              <div class="pointer-gem fiery-gem"></div>
+            </div>
+          </div>
+          <div class="canvas-holder">
+            <canvas id="alevli-wheel-canvas" width="400" height="400"></canvas>
+            <div class="center-cap fiery-cap" id="alevli-center-spin-btn" title="Ateşlemek için tıkla!">
+              <div class="inner-cap">
+                <span class="cap-vip">HOT</span>
+                <span class="spin-text">ATEŞLE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button id="alevli-spin-btn" class="glow-spin-button fiery-spin-btn">
+          <span>🔥 ÇARKI ATEŞLE 🔥</span>
+        </button>
+      </main>
+    </div>
+
+    <!-- SONUÇ PENCERESİ (LÜKS KART MODAL) -->
+    <div id="result-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-glow"></div>
+        <button id="close-modal-btn" class="modal-close" aria-label="Kapat">&times;</button>
+        
+        <div class="modal-top-row">
+          <div class="modal-category-badge" id="modal-category">
+            <span id="modal-cat-icon">🔥</span>
+            <span id="modal-cat-title">SICAK İTİRAF</span>
+          </div>
+          <div id="modal-player-tag" class="modal-player-tag hidden">
+            <span>Sıra:</span> <strong id="modal-player-name">Ahmet</strong>
+          </div>
+        </div>
+
+        <div class="modal-question-container">
+          <span class="quote-mark">“</span>
+          <p id="modal-question-text" class="modal-question-text">
+            Soru yükleniyor...
+          </p>
+          <span class="quote-mark end-quote">”</span>
+        </div>
+
+        <!-- Sanal Görevler İçin 30 Saniye Geri Sayım Sayacı -->
+        <div id="dare-timer-box" class="dare-timer-box hidden">
+          <div class="timer-display">
+            <span class="timer-icon">⏱️</span>
+            <span id="timer-number" class="timer-number">30</span>
+            <span class="timer-unit">saniye</span>
+          </div>
+          <div class="timer-bar-track">
+            <div id="timer-bar-fill" class="timer-bar-fill"></div>
+          </div>
+          <button id="start-timer-btn" class="timer-action-btn">▶ Zamanı Başlat</button>
+        </div>
+
+
+        <!-- Modal Eylemleri (Tamamla, Ceza Çek, Kopyala, Sonraki) -->
+        <div class="modal-actions">
+          <button id="modal-complete-btn" class="modal-btn success" title="Görevi başarıyla yaptım!">
+            <span>✅ Görev Yapıldı (+1 Puan)</span>
+          </button>
+          <button id="modal-penalty-btn" class="modal-btn penalty" title="Cevaplamaktan kaçanlar için!">
+            <span>💀 Pas Geç (Ceza Çek)</span>
+          </button>
+          <button id="copy-question-btn" class="modal-btn secondary">
+            <span id="copy-btn-text">📋 Kopyala</span>
+          </button>
+          <button id="modal-next-btn" class="modal-btn primary">
+            <span>🔥 Sonraki Tur</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEZA MODALI (PAS GEÇİLDİĞİNDE AÇILAN KIŞKIRTICI SANAL CEZALAR) -->
+    <div id="penalty-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card penalty-card">
+        <button id="close-penalty-btn" class="modal-close">&times;</button>
+        <div class="penalty-badge">🔥 KIŞKIRTICI SANAL CEZA</div>
+        <h2 class="penalty-title">SORUDAN KAÇTIN, ŞİMDİ BEDELİNİ ÖDE!</h2>
+        <div class="penalty-box">
+          <span class="penalty-icon">🎭</span>
+          <p id="penalty-text" class="penalty-text">Ceza belirleniyor...</p>
+        </div>
+        <p class="penalty-warning">Cezayı kamerada, mikrofonda veya sohbette tamamlamadan tura devam edilemez!</p>
+        <button id="accept-penalty-btn" class="modal-btn primary full">
+          <span>💀 Cezayı Tamamladım (+1 Ceza)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2 OYUNCU İSİM & SKOR MODALI -->
+    <div id="players-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card players-card">
+        <button id="close-players-btn" class="modal-close">&times;</button>
+        <h2 class="card-title">👥 2 Kişilik Baş Başa Oyun</h2>
+        <p class="card-subtitle">Görüntülü/sesli konuşmadaki iki oyuncunun isimlerini girin:</p>
+        
+        <form id="edit-names-form" class="two-player-form">
+          <div class="input-group">
+            <label for="p1-input">🔥 1. Oyuncu İsmi:</label>
+            <input type="text" id="p1-input" value="1. Oyuncu" maxlength="20" required autocomplete="off">
+          </div>
+          <div class="input-group">
+            <label for="p2-input">💋 2. Oyuncu İsmi:</label>
+            <input type="text" id="p2-input" value="2. Oyuncu" maxlength="20" required autocomplete="off">
+          </div>
+          <div class="players-footer">
+            <button type="button" id="reset-scores-btn" class="modal-btn secondary">Skorları Sıfırla</button>
+            <button type="submit" class="modal-btn primary">💾 Kaydet ve Oyna</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- GEÇMİŞ MODALI -->
+    <div id="history-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card history-card">
+        <button id="close-history-btn" class="modal-close" aria-label="Kapat">&times;</button>
+        <h2 class="history-title">📜 Çekilen Sorular & Görevler</h2>
+        <div class="history-list" id="history-list">
+          <p class="empty-history">Henüz hiçbir soru çekilmedi. Çarkı çevir ve gecenin ateşini yak!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAĞ TARAFTA YÜZEN ULTRA HOT YUVARLAK 'ALEVLİ MOOD' BUTONU (TEK SAYFA GEÇİŞİ) -->
+  <button id="alevli-mood-btn" class="floating-alevli-btn" title="Alevli Mood'a Geç (+18 Küçük Çark)">
+    <div class="flame-halo"></div>
+    <div class="flame-ring"></div>
+    <div class="flame-inner">
+      <span class="flame-emoji">🔥</span>
+      <span class="flame-txt">ALEVLİ<br>MOOD</span>
+      <span class="flame-badge">GEÇİŞ ➔</span>
+    </div>
+  </button>
+
+  <script src="app.js"></script>
+</body>
+</html>
